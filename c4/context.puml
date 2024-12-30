@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Digital Wallet
+
+Person(customer, "Customer", "Digital Waalet customer")
+System(wallet, "Digital Wallet", "Digital Wallet system")
+System_Ext(secret_manager, "Secret Manager", "Credential storage")
+System_Ext(apm, "APM", "Application Performance Monitoring")
+System_Ext(colect, "OTEL", "OpenTelemetry Collector")
+System_Ext(payment_gateway, "Payment Gateway", "Payment Processor")
+
+Rel(customer, wallet, "Uses", "HTTPS")
+Rel(wallet, secret_manager, "Uses", "HTTPS")
+Rel(wallet, apm, "Uses", "HTTPS")
+Rel(wallet, colect, "Sends data to", "HTTPS")
+Rel(wallet, payment_gateway, "Uses", "HTTPS")
+@enduml
+
