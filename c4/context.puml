@@ -3,9 +3,9 @@
 
 title Digital Wallet
 
-Person(customer, "Customer", "Digital Waalet customer")
-System(wallet, "Digital Wallet", "Digital Wallet system")
-System_Ext(secret_manager, "Secret Manager", "Credential storage")
+Person(customer, "Customer", "Digital Wallet Customer")
+System(wallet, "Digital Wallet", "Digital Wallet System")
+System_Ext(secret_manager, "Secret Manager", "Credential Storage")
 System_Ext(apm, "APM", "Application Performance Monitoring")
 System_Ext(colect, "OTEL", "OpenTelemetry Collector")
 System_Ext(payment_gateway, "Payment Gateway", "Payment Processor")

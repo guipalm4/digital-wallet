@@ -3,8 +3,8 @@
 AddRelTag(async, $lineStyle = "dashed", $lineColor = "#707070")
 
 title Digital Wallet
-Person(customer, "Customer", "Digital Waalet customer")
-System(wallet, "Digital Wallet", "Digital Wallet system")
+Person(customer, "Customer", "Digital Wallet Customer")
+System(wallet, "Digital Wallet", "Digital Wallet System")
 System_Ext(payment_gateway, "Payment Gateway", "Payment Processor")
 
 System_Boundary(wallet, "Digital Wallet") {
