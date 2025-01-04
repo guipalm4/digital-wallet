@@ -10,6 +10,7 @@ type Customer struct {
 	ID        string
 	Name      string
 	Email     string
+	Accounts  []*Account
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -44,4 +45,14 @@ func (c *Customer) Update(name, email string) error {
 	c.Email = email
 	c.UpdatedAt = time.Now()
 	return c.Validate()
+}
+
+func (c *Customer) AddAccount(account *Account) error {
+
+	if account.Customer.ID != c.ID {
+		return errors.New("account does not belong to this customer")
+	}
+
+	c.Accounts = append(c.Accounts, account)
+	return nil
 }
