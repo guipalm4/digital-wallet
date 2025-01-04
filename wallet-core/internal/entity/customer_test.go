@@ -18,3 +18,17 @@ func TestCreateNemCustomerWhenArgsAreInvalid(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, customer)
 }
+
+func TestUpdateCustomer(t *testing.T) {
+	customer, _ := NewCustomer("John Doe", "j@j.com")
+	err := customer.Update("Jane Doe", "j@g.com")
+	assert.Nil(t, err)
+	assert.Equal(t, "Jane Doe", customer.Name)
+	assert.Equal(t, "j@g.com", customer.Email)
+}
+
+func TestUpdateWhenArgsAreInvalid(t *testing.T) {
+	customer, _ := NewCustomer("John Doe", "j@j.com")
+	err := customer.Update("", "j@g.com")
+	assert.Error(t, err, "'name' is required")
+}
