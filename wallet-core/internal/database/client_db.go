@@ -15,14 +15,14 @@ func NewClientDB(db *sql.DB) *ClientDB {
 
 func (c *ClientDB) Get(id string) (*entity.Customer, error) {
 	customer := &entity.Customer{}
-	stmt, err := c.DB.Prepare("SELECT id, name, created_at FROM customers WHERE id = ?")
+	stmt, err := c.DB.Prepare("SELECT id, name, email, created_at FROM customers WHERE id = ?")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 	row := stmt.QueryRow(id)
 
-	if err := row.Scan(&customer.ID, &customer.Name, &customer.CreatedAt); err != nil {
+	if err := row.Scan(&customer.ID, &customer.Name, &customer.Email, &customer.CreatedAt); err != nil {
 		return nil, err
 	}
 	return customer, nil
@@ -30,6 +30,7 @@ func (c *ClientDB) Get(id string) (*entity.Customer, error) {
 
 func (c *ClientDB) Save(customer *entity.Customer) error {
 	stmt, err := c.DB.Prepare("INSERT INTO customers (id, name, email, created_at) VALUES (?, ?, ?, ?)")
+
 	if err != nil {
 		return err
 	}
