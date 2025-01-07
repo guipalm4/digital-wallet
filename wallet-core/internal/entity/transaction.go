@@ -14,7 +14,7 @@ type Transaction struct {
 	CreatedAt   time.Time
 }
 
-func NewTransaction(accountFrom, accountTo *Account, amount float64) (*Transaction, error) {
+func NewTransaction(accountFrom *Account, accountTo *Account, amount float64) (*Transaction, error) {
 	transaction := &Transaction{
 		ID:          uuid.New().String(),
 		AccountFrom: accountFrom,
