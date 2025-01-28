@@ -3,6 +3,7 @@ package create_transaction
 import (
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/entity"
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/gateway"
+	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 )
 
 type CreateTransactionInput struct {
@@ -18,15 +19,22 @@ type CreateTransactionOutput struct {
 type CreateTransactionUseCase struct {
 	TransactionGateway gateway.TransactionGateway
 	AccountGateway     gateway.AccountGateway
+	EventDispatcher    events.IEventDispatcher
+	TransactionCreated events.IEvent
 }
 
 func NewCreateTransactionUseCase(
 	transactionGateway gateway.TransactionGateway,
-	accountGateway gateway.AccountGateway) *CreateTransactionUseCase {
+	accountGateway gateway.AccountGateway,
+	eventDispatcher events.IEventDispatcher,
+	transactionCreated events.IEvent,
+) *CreateTransactionUseCase {
 
 	return &CreateTransactionUseCase{
 		TransactionGateway: transactionGateway,
 		AccountGateway:     accountGateway,
+		EventDispatcher:    eventDispatcher,
+		TransactionCreated: transactionCreated,
 	}
 }
 
@@ -47,7 +55,11 @@ func (uc *CreateTransactionUseCase) Execute(input CreateTransactionInput) (*Crea
 	if err != nil {
 		return nil, err
 	}
-	return &CreateTransactionOutput{
+	output := &CreateTransactionOutput{
 		ID: transaction.ID,
-	}, nil
+	}
+	uc.TransactionCreated.SetPayload(output)
+	uc.EventDispatcher.Dispatch(uc.TransactionCreated)
+
+	return output, nil
 }

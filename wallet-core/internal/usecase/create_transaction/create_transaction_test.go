@@ -2,6 +2,8 @@ package create_transaction
 
 import (
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/entity"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/event"
+	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -52,7 +54,10 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 		Amount:        50,
 	}
 
-	uc := NewCreateTransactionUseCase(mockTransactionGateway, mockAccountGateway)
+	dispatcher := events.NewEventDispatcher()
+	event := event.NewTransactionCreated()
+
+	uc := NewCreateTransactionUseCase(mockTransactionGateway, mockAccountGateway, dispatcher, event)
 
 	output, err := uc.Execute(input)
 	assert.Nil(t, err)
