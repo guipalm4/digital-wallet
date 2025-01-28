@@ -11,7 +11,7 @@ import (
 type ClientDBTestSuite struct {
 	suite.Suite
 	db       *sql.DB
-	clientDB *ClientDB
+	clientDB *CustomerDB
 }
 
 func (s *ClientDBTestSuite) SetupTest() {
@@ -19,7 +19,7 @@ func (s *ClientDBTestSuite) SetupTest() {
 	s.Require().NoError(err)
 	s.db = db
 	db.Exec("Create table customers (id varchar(255), name varchar(255), email varchar(255), created_at date)")
-	s.clientDB = NewClientDB(db)
+	s.clientDB = NewCustomerDB(db)
 }
 
 func (s *ClientDBTestSuite) TearDownTest() {

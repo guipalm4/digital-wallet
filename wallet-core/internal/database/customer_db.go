@@ -5,15 +5,15 @@ import (
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/entity"
 )
 
-type ClientDB struct {
+type CustomerDB struct {
 	DB *sql.DB
 }
 
-func NewClientDB(db *sql.DB) *ClientDB {
-	return &ClientDB{DB: db}
+func NewCustomerDB(db *sql.DB) *CustomerDB {
+	return &CustomerDB{DB: db}
 }
 
-func (c *ClientDB) Get(id string) (*entity.Customer, error) {
+func (c *CustomerDB) Get(id string) (*entity.Customer, error) {
 	customer := &entity.Customer{}
 	stmt, err := c.DB.Prepare("SELECT id, name, email, created_at FROM customers WHERE id = ?")
 	if err != nil {
@@ -28,7 +28,7 @@ func (c *ClientDB) Get(id string) (*entity.Customer, error) {
 	return customer, nil
 }
 
-func (c *ClientDB) Save(customer *entity.Customer) error {
+func (c *CustomerDB) Save(customer *entity.Customer) error {
 	stmt, err := c.DB.Prepare("INSERT INTO customers (id, name, email, created_at) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
