@@ -4,6 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/database"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/event"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/usecase/create_account"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/usecase/create_customer"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/usecase/create_transaction"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/web"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/web/webserver"
+	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 )
 
 func main() {
@@ -16,16 +24,26 @@ func main() {
 
 	defer db.Close()
 
-	//eventDispatcher := events.NewEventDispatcher()
-	//transactionCreatedEvent := event.NewTransactionCreated()
-	////eventDispatcher.Register("TransactionCreated", handler)
-	//
-	//customerDb := database.NewCustomerDB(db)
-	//accountDb := database.NewAccountDB(db)
-	//transactionDb := database.NewTransactionDB(db)
-	//
-	//createCustomerUseCase := create_customer.NewCreateCustomerUseCase(customerDb)
-	//createAccountUseCase := create_account.NewCreateAccountUseCase(accountDb, customerDb)
-	//createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+	eventDispatcher := events.NewEventDispatcher()
+	transactionCreatedEvent := event.NewTransactionCreated()
+	//eventDispatcher.Register("TransactionCreated", handler)
+	customerDb := database.NewCustomerDB(db)
+	accountDb := database.NewAccountDB(db)
+	transactionDb := database.NewTransactionDB(db)
 
+	createCustomerUseCase := create_customer.NewCreateCustomerUseCase(customerDb)
+	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDb, customerDb)
+	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+
+	server := webserver.NewWebServer(":3000")
+
+	customerHandler := web.NewWebCustomerHandler(*createCustomerUseCase)
+	accountHandler := web.NewWebAccountHandler(*createAccountUseCase)
+	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
+
+	server.AddHandler("/customer", customerHandler.CreateCustomer)
+	server.AddHandler("/account", accountHandler.CreateAccount)
+	server.AddHandler("/transaction", transactionHandler.CreateTransaction)
+
+	server.Start()
 }
