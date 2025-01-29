@@ -41,9 +41,9 @@ func main() {
 	accountHandler := web.NewWebAccountHandler(*createAccountUseCase)
 	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
 
-	server.AddHandler("/customer", customerHandler.CreateCustomer)
-	server.AddHandler("/account", accountHandler.CreateAccount)
-	server.AddHandler("/transaction", transactionHandler.CreateTransaction)
+	server.AddHandler("/customers", customerHandler.CreateCustomer)
+	server.AddHandler("/accounts", accountHandler.CreateAccount)
+	server.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
 	server.Start()
 }
