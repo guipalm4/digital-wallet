@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -12,6 +13,7 @@ import (
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/web"
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/web/webserver"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
+	"github.com/guipalm4/digital-wallet/wallet-core/pkg/uow"
 )
 
 func main() {
@@ -29,11 +31,21 @@ func main() {
 	//eventDispatcher.Register("TransactionCreated", handler)
 	customerDb := database.NewCustomerDB(db)
 	accountDb := database.NewAccountDB(db)
-	transactionDb := database.NewTransactionDB(db)
+
+	ctx := context.Background()
+	uow := uow.NewUow(ctx, db)
+
+	uow.Register("AccountDB", func(tx *sql.Tx) interface{} {
+		return database.NewAccountDB(db)
+	})
+
+	uow.Register("TransactionDB", func(tx *sql.Tx) interface{} {
+		return database.NewTransactionDB(db)
+	})
 
 	createCustomerUseCase := create_customer.NewCreateCustomerUseCase(customerDb)
 	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDb, customerDb)
-	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(uow, eventDispatcher, transactionCreatedEvent)
 
 	server := webserver.NewWebServer(":3000")
 

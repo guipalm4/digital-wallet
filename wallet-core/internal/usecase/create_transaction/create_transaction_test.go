@@ -1,36 +1,15 @@
 package create_transaction
 
 import (
+	"context"
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/entity"
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/event"
+	"github.com/guipalm4/digital-wallet/wallet-core/internal/usecase/mocks"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 )
-
-type TransactionGatewayMock struct {
-	mock.Mock
-}
-
-func (m *TransactionGatewayMock) Create(transaction *entity.Transaction) error {
-	args := m.Called(transaction)
-	return args.Error(0)
-}
-
-type AccountGatewayMock struct {
-	mock.Mock
-}
-
-func (m *AccountGatewayMock) Get(id string) (*entity.Account, error) {
-	args := m.Called(id)
-	return args.Get(0).(*entity.Account), args.Error(1)
-}
-
-func (m *AccountGatewayMock) Save(account *entity.Account) error {
-	args := m.Called(account)
-	return args.Error(0)
-}
 
 func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	customer1, _ := entity.NewCustomer("John Doe", "j@j.com")
@@ -41,12 +20,8 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	account2 := entity.NewAccount(customer2)
 	account2.Credit(100)
 
-	mockAccountGateway := &AccountGatewayMock{}
-	mockAccountGateway.On("Get", account1.ID).Return(account1, nil)
-	mockAccountGateway.On("Get", account2.ID).Return(account2, nil)
-
-	mockTransactionGateway := &TransactionGatewayMock{}
-	mockTransactionGateway.On("Create", mock.Anything).Return(nil)
+	mockUow := &mocks.UowMock{}
+	mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
 
 	input := CreateTransactionInput{
 		AccountIDFrom: account1.ID,
@@ -56,14 +31,13 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 
 	dispatcher := events.NewEventDispatcher()
 	event := event.NewTransactionCreated()
+	ctx := context.Background()
 
-	uc := NewCreateTransactionUseCase(mockTransactionGateway, mockAccountGateway, dispatcher, event)
+	uc := NewCreateTransactionUseCase(mockUow, dispatcher, event)
 
-	output, err := uc.Execute(input)
+	output, err := uc.Execute(ctx, input)
 	assert.Nil(t, err)
-	assert.NotNil(t, output.ID)
-	mockAccountGateway.AssertExpectations(t)
-	mockTransactionGateway.AssertExpectations(t)
-	mockAccountGateway.AssertNumberOfCalls(t, "Get", 2)
-	mockTransactionGateway.AssertNumberOfCalls(t, "Create", 1)
+	assert.NotNil(t, output)
+	mockUow.AssertExpectations(t)
+	mockUow.AssertNumberOfCalls(t, "Do", 1)
 }
