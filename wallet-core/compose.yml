@@ -1,6 +1,7 @@
 services:
   goapp:
     build: .
+    container_name: wallet
     volumes:
       - .:/app
     ports:
