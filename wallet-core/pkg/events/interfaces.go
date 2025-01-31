@@ -5,21 +5,21 @@ import (
 	"time"
 )
 
-type EventInterface interface {
+type IEvent interface {
 	GetName() string
 	GetDateTime() time.Time
 	GetPayload() interface{}
 	SetPayload(payload interface{})
 }
 
-type EventHandlerInterface interface {
-	Handle(event EventInterface, wg *sync.WaitGroup)
+type IEventHandler interface {
+	Handle(event IEvent, wg *sync.WaitGroup)
 }
 
-type EventDispatcherInterface interface {
-	Register(eventName string, handler EventHandlerInterface) error
-	Dispatch(event EventInterface) error
-	Remove(eventName string, handler EventHandlerInterface) error
-	Has(eventName string, handler EventHandlerInterface) bool
+type IEventDispatcher interface {
+	Register(eventName string, handler IEventHandler) error
+	Dispatch(event IEvent) error
+	Remove(eventName string, handler IEventHandler) error
+	Has(eventName string, handler IEventHandler) bool
 	Clear()
 }
