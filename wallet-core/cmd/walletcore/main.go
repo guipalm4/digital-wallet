@@ -67,5 +67,6 @@ func main() {
 	server.AddHandler("/accounts", accountHandler.CreateAccount)
 	server.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
+	fmt.Println("Server is running 🚀")
 	server.Start()
 }
