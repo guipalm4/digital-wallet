@@ -13,18 +13,18 @@ func NewTransactionCreated() *TransactionCreated {
 	}
 }
 
-func (t *TransactionCreated) GetName() string {
-	return t.Name
+func (e *TransactionCreated) GetName() string {
+	return e.Name
 }
 
-func (t *TransactionCreated) GetPayload() interface{} {
-	return t.Payload
+func (e *TransactionCreated) GetPayload() interface{} {
+	return e.Payload
 }
 
-func (t *TransactionCreated) SetPayload(payload interface{}) {
-	t.Payload = payload
+func (e *TransactionCreated) SetPayload(payload interface{}) {
+	e.Payload = payload
 }
 
-func (t *TransactionCreated) GetDateTime() time.Time {
+func (e *TransactionCreated) GetDateTime() time.Time {
 	return time.Now()
 }
