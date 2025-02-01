@@ -17,8 +17,8 @@ func TestNewTransaction(t *testing.T) {
 	transaction, err := NewTransaction(account1, account2, 50)
 	assert.Nil(t, err)
 	assert.NotNil(t, transaction)
-	assert.Equal(t, 50.0, account1.Balance)
-	assert.Equal(t, 150.0, account2.Balance)
+	assert.Equal(t, 1050.0, account1.Balance)
+	assert.Equal(t, 1150.0, account2.Balance)
 }
 
 func TestNewTransactionWhenInsufficientBalance(t *testing.T) {
@@ -30,12 +30,12 @@ func TestNewTransactionWhenInsufficientBalance(t *testing.T) {
 	account1.Credit(100)
 	account2.Credit(100)
 
-	transaction, err := NewTransaction(account1, account2, 200)
+	transaction, err := NewTransaction(account1, account2, 2000)
 	assert.NotNil(t, err)
 	assert.Error(t, err, "insufficient funds")
 	assert.Nil(t, transaction)
-	assert.Equal(t, 100.0, account1.Balance)
-	assert.Equal(t, 100.0, account2.Balance)
+	assert.Equal(t, 1100.0, account1.Balance)
+	assert.Equal(t, 1100.0, account2.Balance)
 }
 
 func TestNewTransactionWhenAmountIsZero(t *testing.T) {
@@ -51,6 +51,6 @@ func TestNewTransactionWhenAmountIsZero(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Error(t, err, "'amount' must be greater than 0")
 	assert.Nil(t, transaction)
-	assert.Equal(t, 100.0, account1.Balance)
-	assert.Equal(t, 100.0, account2.Balance)
+	assert.Equal(t, 1100.0, account1.Balance)
+	assert.Equal(t, 1100.0, account2.Balance)
 }

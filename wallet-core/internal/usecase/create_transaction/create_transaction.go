@@ -21,28 +21,39 @@ type CreateTransactionOutput struct {
 	Amount        float64 `json:"amount"`
 }
 
+type BalanceUpdatedOutput struct {
+	AccountIDFrom        string  `json:"account_id_from"`
+	AccountIDTo          string  `json:"account_id_to"`
+	BalanceAccountIDFrom float64 `json:"balance_account_id_from"`
+	BalanceAccountIDTo   float64 `json:"balance_account_id_to"`
+}
+
 type CreateTransactionUseCase struct {
 	Uow                uow.UowInterface
 	EventDispatcher    events.IEventDispatcher
 	TransactionCreated events.IEvent
+	BalanceUpdated     events.IEvent
 }
 
 func NewCreateTransactionUseCase(
 	Uow uow.UowInterface,
 	eventDispatcher events.IEventDispatcher,
 	transactionCreated events.IEvent,
+	balanceUpdated events.IEvent,
 ) *CreateTransactionUseCase {
 
 	return &CreateTransactionUseCase{
 		Uow:                Uow,
 		EventDispatcher:    eventDispatcher,
 		TransactionCreated: transactionCreated,
+		BalanceUpdated:     balanceUpdated,
 	}
 }
 
 func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTransactionInput) (*CreateTransactionOutput, error) {
 
 	output := &CreateTransactionOutput{}
+	balanceUpdatedOutput := &BalanceUpdatedOutput{}
 
 	err := uc.Uow.Do(ctx, func(_ *uow.Uow) error {
 		accountRepository := uc.getAccountRepository(ctx)
@@ -80,6 +91,11 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTra
 		output.AccountIDTo = input.AccountIDTo
 		output.Amount = input.Amount
 
+		balanceUpdatedOutput.AccountIDFrom = input.AccountIDFrom
+		balanceUpdatedOutput.AccountIDTo = input.AccountIDTo
+		balanceUpdatedOutput.BalanceAccountIDFrom = accountFrom.Balance
+		balanceUpdatedOutput.BalanceAccountIDTo = accountTo.Balance
+
 		return nil
 	})
 
@@ -90,6 +106,8 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTra
 	uc.TransactionCreated.SetPayload(output)
 	uc.EventDispatcher.Dispatch(uc.TransactionCreated)
 
+	uc.BalanceUpdated.SetPayload(balanceUpdatedOutput)
+	uc.EventDispatcher.Dispatch(uc.BalanceUpdated)
 	return output, nil
 }
 
