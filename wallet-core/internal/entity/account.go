@@ -19,7 +19,7 @@ func NewAccount(customer *Customer) *Account {
 	return &Account{
 		ID:        customer.ID,
 		Customer:  customer,
-		Balance:   0,
+		Balance:   1000,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

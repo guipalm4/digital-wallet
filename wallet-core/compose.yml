@@ -2,10 +2,12 @@ services:
   goapp:
     build: .
     container_name: wallet
+    platform: linux/amd64
     volumes:
       - .:/app
     ports:
       - "8080:8080"
+  
   mysql:
     image: mysql:5.7
     container_name: mysql_wallet
@@ -38,9 +40,6 @@ services:
     depends_on:
       - zookeeper
     ports:
-      # Exposes 9092 for external connections to the broker
-      # Use kafka:29092 for connections internal on the docker network
-      # See https://rmoff.net/2018/08/02/kafka-listeners-explained/ for details
       - '9092:9092'
     environment:
       TZ: Sao_Paulo/Brazil
@@ -56,11 +55,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
 
+  # Control Center
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.3.0
     hostname: control-center
     container_name: control-center
-    platform: linux/amd64
     depends_on:
       - kafka
     ports:

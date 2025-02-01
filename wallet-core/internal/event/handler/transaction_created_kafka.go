@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -21,5 +22,11 @@ func NewTransactionCreatedKafkaHandler(kafka *kafka.Producer) *TransactionCreate
 func (h *TransactionCreatedKafkaHandler) Handle(message events.IEvent, wg *sync.WaitGroup) {
 	defer wg.Done()
 	h.Kafka.Publish(message, nil, "transactions")
-	fmt.Println("TransactionCreatedKafkaHandler: ", message.GetPayload())
+	messageJson, err := json.MarshalIndent(message.GetPayload(), "", "    ")
+	if err != nil {
+		fmt.Println("Erro ao converter para JSON:", err)
+		return
+	}
+
+	fmt.Println("TransactionCreatedKafkaHandler: ", string(messageJson))
 }
