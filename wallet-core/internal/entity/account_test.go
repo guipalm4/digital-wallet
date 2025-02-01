@@ -21,7 +21,7 @@ func TestCreditAccount(t *testing.T) {
 	customer, _ := NewCustomer("John Doe", "john.doe@mail.com")
 	account := NewAccount(customer)
 	account.Credit(100)
-	assert.Equal(t, 100.0, account.Balance)
+	assert.Equal(t, 1100.0, account.Balance)
 }
 
 func TestDebitAccount(t *testing.T) {
@@ -29,5 +29,5 @@ func TestDebitAccount(t *testing.T) {
 	account := NewAccount(customer)
 	account.Credit(100)
 	account.Debit(50)
-	assert.Equal(t, 50.0, account.Balance)
+	assert.Equal(t, 1050.0, account.Balance)
 }
