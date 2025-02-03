@@ -1,0 +1,110 @@
+services:
+  goapp:
+    build: ./wallet-core
+    container_name: wallet
+    platform: linux/amd64
+    # volumes:
+    #   - ./wallet-core:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - kafka
+  
+  mysql:
+    image: mysql:5.7
+    container_name: mysql_wallet
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wallet
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./wallet-core/.docker/mysql:/var/lib/mysql
+
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:6.1.0"
+    container_name: zookeeper
+    platform: linux/amd64
+    ports:
+      - 2181:2181
+    environment:
+      TZ: Sao_Paulo/Brazil
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: "confluentinc/cp-enterprise-kafka:6.1.0"
+    container_name: kafka
+    platform: linux/amd64
+    depends_on:
+      - zookeeper
+    ports:
+      - '9092:9092'
+    environment:
+      TZ: Sao_Paulo/Brazil
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_ENABLE: 'false'
+
+  # Control Center
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.3.0
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+
+  wallet-balance-db:
+    image: postgres:14
+    platform: linux/amd64
+    container_name: wallet-balance-db
+    environment:
+      POSTGRES_USER: balancesuser
+      POSTGRES_PASSWORD: balancespassa
+      POSTGRES_DB: balancesdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./wallet-balance/.docker/postgres_data:/var/lib/postgresql/data
+  wallet-balance:
+    build:
+      context: ./wallet-balance
+      dockerfile: Dockerfile
+    container_name: wallet-balance
+    platform: linux/amd64
+    depends_on:
+      - wallet-balance-db
+      - kafka
+    env_file:
+      - ./wallet-balance/.env
+    ports:
+      - "3003:3003"
+  create-topics:
+    image: confluentinc/cp-kafka:6.1.0
+    container_name: create-topics
+    platform: linux/amd64
+    depends_on:
+      - kafka
+    volumes:
+      - ./wallet-core/create_topic.sh:/tmp/create_topic.sh:ro
+    entrypoint: ["/bin/bash", "/tmp/create_topic.sh"]      
