@@ -6,6 +6,7 @@ import (
 	"github.com/guipalm4/digital-wallet/wallet-core/internal/gateway"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/uow"
+	"log"
 )
 
 type CreateTransactionInput struct {
@@ -58,30 +59,33 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTra
 	err := uc.Uow.Do(ctx, func(_ *uow.Uow) error {
 		accountRepository := uc.getAccountRepository(ctx)
 		transactionRepository := uc.getTransactionRepository(ctx)
-
+		log.Printf("Recovering account ID from: %s", input.AccountIDFrom)
 		accountFrom, err := accountRepository.Get(input.AccountIDFrom)
 		if err != nil {
 			return err
 		}
+		log.Printf("Recovering account ID to %s", input.AccountIDTo)
 		accountTo, err := accountRepository.Get(input.AccountIDTo)
 		if err != nil {
 			return err
 		}
+		log.Printf("Creating transaction. Account from: %s, Account to: %s, Amount: %f", input.AccountIDFrom, input.AccountIDTo, input.Amount)
 		transaction, err := entity.NewTransaction(accountFrom, accountTo, input.Amount)
 		if err != nil {
 			return err
 		}
-
+		log.Printf("Updating balance account from: %s", input.AccountIDFrom)
 		err = accountRepository.UpdateBalance(accountFrom)
 		if err != nil {
 			return err
 		}
-
+		log.Printf("Updating balance account to: %s", input.AccountIDTo)
 		err = accountRepository.UpdateBalance(accountTo)
 		if err != nil {
 			return err
 		}
 
+		log.Printf("Creating transaction on database")
 		err = transactionRepository.Create(transaction)
 		if err != nil {
 			return err
@@ -104,9 +108,11 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTra
 	}
 
 	uc.TransactionCreated.SetPayload(output)
+	log.Printf("Dispatching event TransactionCreated with payload: %v", output)
 	uc.EventDispatcher.Dispatch(uc.TransactionCreated)
 
 	uc.BalanceUpdated.SetPayload(balanceUpdatedOutput)
+	log.Printf("Dispatching event BalanceUpdated with payload: %v", balanceUpdatedOutput)
 	uc.EventDispatcher.Dispatch(uc.BalanceUpdated)
 	return output, nil
 }

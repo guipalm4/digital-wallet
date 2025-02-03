@@ -27,7 +27,8 @@ import (
 
 func main() {
 
-	dbUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql", "3306", "wallet")
+	dbUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql", "3306", "wallet") //Calling on container
+	//dbUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "localhost", "3306", "wallet") //Calling on localhost
 	db, err := sql.Open("mysql", dbUrl)
 	if err != nil {
 		panic(err)
@@ -92,7 +93,8 @@ func main() {
 func runMigrations(dbUrl string) error {
 
 	migrationDSN := "mysql://" + dbUrl
-	migrationPath := "file:///app/migrations"
+	migrationPath := "file:///app/migrations" //Executing on container
+	//migrationPath := "file://migrations" //Executing on localhost
 
 	m, err := migrate.New(migrationPath, migrationDSN)
 	if err != nil {
