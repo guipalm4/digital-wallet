@@ -26,9 +26,9 @@ const seeder = new Umzug({
 async function runSeeds() {
   try {
     const seeds = await seeder.up();
-    console.log('Seeds executadas:', seeds.map((s) => s.name));
+    console.log('Seeds executed:', seeds.map((s) => s.name));
   } catch (error) {
-    console.error('Erro ao executar seeds:', error);
+    console.error('Error executing seeds:', error);
     process.exit(1);
   }
 }

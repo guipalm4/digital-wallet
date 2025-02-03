@@ -94,8 +94,7 @@ func runMigrations(dbUrl string) error {
 
 	migrationDSN := "mysql://" + dbUrl
 	migrationPath := "file:///app/migrations" //Executing on container
-	//migrationPath := "file://migrations" //Executing on localhost
-
+	//migrationPath := "file:///migrations" //Executing on localhost
 	m, err := migrate.New(migrationPath, migrationDSN)
 	if err != nil {
 		panic(fmt.Errorf("Error on create migrator: %w", err))

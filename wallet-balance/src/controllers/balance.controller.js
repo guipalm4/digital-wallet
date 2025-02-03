@@ -1,6 +1,5 @@
 const { Balance } = require('../models/balance.model');
 
-
 exports.getBalance = async (req, res) => {
   try {
     const { account_id } = req.params;

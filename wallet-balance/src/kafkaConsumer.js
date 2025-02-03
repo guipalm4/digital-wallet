@@ -14,33 +14,48 @@ exports.startKafkaConsumer = async () => {
     await consumer.connect();
     await consumer.subscribe({ topic: process.env.KAFKA_BALANCE_UPDATES_TOPIC, fromBeginning: true });
 
-    console.log('Consumidor Kafka conectado e subscrito ao tópico:', process.env.KAFKA_BALANCE_UPDATES_TOPIC);
+    console.log('afka consumer connected and subscribed to the topic:', process.env.KAFKA_BALANCE_UPDATES_TOPIC);
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         try {
           const eventData = JSON.parse(message.value.toString());
-          console.log(`Mensagem recebida do tópico ${topic}`, eventData);
-
-          const { accountId, balance } = eventData;
-
-          if (!accountId || balance === undefined) {
-            console.log('Mensagem inválida, ignorando...');
-            return;
+          console.log(`Message received from topic ${topic}`, eventData);
+    
+          const { Name, Payload } = eventData;
+          
+          if (Name === "BalanceUpdated") {
+            const {
+              account_id_from,
+              account_id_to,
+              balance_account_id_from,
+              balance_account_id_to
+            } = Payload;
+    
+            await Balance.upsert({
+              accountId: account_id_from,
+              balance: balance_account_id_from
+            });
+    
+            await Balance.upsert({
+              accountId: account_id_to,
+              balance: balance_account_id_to
+            });
+    
+            console.log(`Balances successfully updated:
+              Account: ${account_id_from} => ${balance_account_id_from}
+              Account: ${account_id_to} => ${balance_account_id_to}
+            `);
+          } else {
+            console.log("Unrecognized or unhandled event:", Name);
           }
-
-          await Balance.upsert({
-            accountId: accountId,
-            balance: balance
-          });
-
-          console.log(`Balance da conta ${accountId} atualizado para: ${balance}`);
         } catch (err) {
-          console.error('Erro ao processar mensagem Kafka:', err);
+          console.error('Error processing Kafka message:', err);
         }
       }
     });
+    
   } catch (error) {
-    console.error('Erro no Kafka consumer:', error);
+    console.error('Error on Kafka consumer:', error);
   }
 };

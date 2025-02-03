@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const { sequelize } = require('./models/balance.model');
 const routes = require('./routes');
 const { runMigrationsAndSeeds } = require('./database/setup');
 const { startKafkaConsumer } = require('./kafkaConsumer');
