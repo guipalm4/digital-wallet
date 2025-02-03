@@ -95,10 +95,12 @@ services:
     depends_on:
       - wallet-balance-db
       - kafka
+      - create-topics
     env_file:
       - ./wallet-balance/.env
     ports:
       - "3003:3003"
+
   create-topics:
     image: confluentinc/cp-kafka:6.1.0
     container_name: create-topics

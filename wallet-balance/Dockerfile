@@ -6,7 +6,8 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+COPY ./wait-for-it.sh /usr/bin/wait-for-it
 
 EXPOSE 3003
 
-CMD ["npm", "run", "start"]
+CMD ["wait-for-it", "kafka:29092", "--", "npm", "run", "start"]
