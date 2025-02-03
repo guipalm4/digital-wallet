@@ -16,18 +16,30 @@ import (
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/events"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/kafka"
 	"github.com/guipalm4/digital-wallet/wallet-core/pkg/uow"
+	"log"
 
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql", "3306", "wallet"))
+	dbUrl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql", "3306", "wallet")
+	db, err := sql.Open("mysql", dbUrl)
 	if err != nil {
 		panic(err)
 	}
 
 	defer db.Close()
+
+	err = runMigrations(dbUrl)
+
+	if err != nil {
+		panic(fmt.Errorf("error executing migrations: %w", err))
+	}
 
 	configMap := ckafka.ConfigMap{
 		"bootstrap.servers": "kafka:29092",
@@ -75,4 +87,28 @@ func main() {
 
 	fmt.Println("Server is running 🚀")
 	server.Start()
+}
+
+func runMigrations(dbUrl string) error {
+
+	migrationDSN := "mysql://" + dbUrl
+	migrationPath := "file:///app/migrations"
+
+	m, err := migrate.New(migrationPath, migrationDSN)
+	if err != nil {
+		panic(fmt.Errorf("Error on create migrator: %w", err))
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		panic(fmt.Errorf("erro on apply migrations: %w", err))
+	} else if err == migrate.ErrNoChange {
+		log.Println("No pending migrations to be applied.")
+	} else {
+		log.Println("Migrations successfully applied!")
+	}
+
+	if srcErr, dbErr := m.Close(); srcErr != nil || dbErr != nil {
+		log.Printf("Errors when closing migrator (sourceErr: %v, dbErr: %v)", srcErr, dbErr)
+	}
+	return nil
 }
