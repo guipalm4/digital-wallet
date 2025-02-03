@@ -1,0 +1,10 @@
+# ACCOUNTS ID previously registered in the database via migration
+# ./migrations/0004_create_customers_accounts.up.sql
+POST http://localhost:8080/transactions HTTP/1.1
+Content-Type: application/json
+
+{
+  "account_id_from": "31c7ec79-5a0a-47bc-bc8d-b7d3f2072605",
+  "account_id_to": "fe69c70b-4096-4160-977b-86ab3ac1c9fa",
+  "amount": 250
+}
