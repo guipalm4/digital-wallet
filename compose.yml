@@ -2,7 +2,7 @@ services:
   goapp:
     build: ./wallet-core
     container_name: wallet
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     # volumes:
     #   - ./wallet-core:/app
     ports:
@@ -14,7 +14,7 @@ services:
   mysql:
     image: mysql:5.7
     container_name: mysql_wallet
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
@@ -27,7 +27,7 @@ services:
   zookeeper:
     image: "confluentinc/cp-zookeeper:6.1.0"
     container_name: zookeeper
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     ports:
       - 2181:2181
     environment:
@@ -38,7 +38,7 @@ services:
   kafka:
     image: "confluentinc/cp-enterprise-kafka:6.1.0"
     container_name: kafka
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     depends_on:
       - zookeeper
     ports:
@@ -76,7 +76,7 @@ services:
 
   wallet-balance-db:
     image: postgres:14
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     container_name: wallet-balance-db
     environment:
       POSTGRES_USER: balancesuser
@@ -91,7 +91,7 @@ services:
       context: ./wallet-balance
       dockerfile: Dockerfile
     container_name: wallet-balance
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     depends_on:
       - wallet-balance-db
       - kafka
@@ -104,7 +104,7 @@ services:
   create-topics:
     image: confluentinc/cp-kafka:6.1.0
     container_name: create-topics
-    platform: linux/amd64
+    # platform: linux/amd64 #uncomment if using Apple M chip
     depends_on:
       - kafka
     volumes:
